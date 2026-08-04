@@ -1,0 +1,1007 @@
+#############################################################################
+# Auto job change + farm maps + stop at Base 50
+# Set firstJob in config.txt (Thief / Swordman)
+#############################################################################
+
+automacro supercode_job_search_from_moc_mk {
+	disabled 1
+	InMap moc_mk
+	JobID 0
+	JobLevel >= 10
+	exclusive 1
+	priority 100
+    timeout 60
+	call supercode_job_search_from_moc_mk_M
+}
+
+macro supercode_job_search_from_moc_mk_M {
+	log [job] exiting moc_mk through verified portal near 101 23 to search for job NPC
+	do conf attackAuto 0
+	do conf route_randomWalk 0
+	do conf lockMap
+	do move 100 24
+	pause 6
+	do conf route_randomWalk 1
+	do conf route_randomWalk_inLockOnly 0
+}
+
+automacro supercode_job_search_to_prt_church {
+	disabled 1
+	InMap moc_fild12
+	JobID 0
+	JobLevel >= 10
+	exclusive 1
+	priority 99
+	timeout 999999
+	call supercode_job_search_to_prt_church_M
+}
+
+macro supercode_job_search_to_prt_church_M {
+	log [job] searching for Acolyte job NPC at prt_church
+	do conf attackAuto 0
+	do conf route_randomWalk 0
+	do conf lockMap
+	do move prt_church
+	pause 8
+	do conf route_randomWalk 1
+	do conf route_randomWalk_inLockOnly 0
+}
+
+automacro supercode_change_job_class1 {
+	InMap moc_mk
+	JobID 0
+	JobLevel >= 10
+	exclusive 1
+	priority 110
+	timeout 999999
+	call supercode_change_job_class1_M
+}
+
+macro supercode_change_job_class1_M {
+	log [job] found class-1 job-change NPC at moc_mk 102 78; opening conversation
+	do conf attackAuto 0
+	do conf route_randomWalk 0
+	do move 101 78
+	pause 3
+	do talknpc 102 78 w1 c
+	pause 2
+	do talk resp 0
+	pause 5
+	do conf attackAuto 2
+	do conf route_randomWalk 1
+	do conf route_randomWalk_inLockOnly 1
+}
+
+automacro novice_basic9 {
+	JobID 0
+	JobLevel < 10
+	BaseLevel < 50
+	exclusive 0
+	timeout 120
+	call novice_basic9_M
+}
+
+macro novice_basic9_M {
+	log [farm] Novice - set NV_BASIC 9
+	do conf skillsAddAuto 1
+	do conf skillsAddAuto_list NV_BASIC 9, AL_DP 10, AL_DEMONBANE 10, AL_HEAL 10, AL_INCAGI 10, AL_BLESSING 10, PR_MACEMASTERY 10
+}
+
+# The Aurora novice instance reaches new_1-3, but the generic route graph
+# cannot reliably solve the long exit route to the farming map. Walk through
+# the known live portals one map at a time, then let normal routing continue.
+automacro aurora_novice_training {
+	InMap new_1-3
+	JobLevel < 10
+	ConfigKeyNot attackAuto_routeToLock 0
+	exclusive 0
+	priority 30
+	timeout 60
+	call aurora_novice_training_M
+}
+
+macro aurora_novice_training_M {
+	log [farm] novice training: suppressing lock-map route until Job Level 10
+	do conf attackAuto_routeToLock 0
+}
+
+automacro aurora_buff_ab_probe {
+	InMap new_1-3
+	run-once 1
+	exclusive 1
+	priority 35
+	timeout 120
+	call aurora_buff_ab_probe_M
+}
+
+macro aurora_buff_ab_probe_M {
+	log [farm] probing Buff NPC near novice spawn at 90 33
+	do conf attackAuto 0
+	do talknpc 90 33 w1 c
+	pause 3
+	do conf attackAuto 2
+}
+
+automacro aurora_low_hp_buff {
+	InMap new_1-3
+	CurrentHP < 40%
+	exclusive 1
+	priority 60
+	timeout 60
+	call aurora_low_hp_buff_M
+}
+
+macro aurora_low_hp_buff_M {
+	log [farm] HP low; going to Buff NPC at 90 33 for heal/buffs
+	do ai clear
+	do conf attackAuto 0
+	do move 90 33
+	pause 2
+	do talknpc 90 33 w1 c
+	pause 4
+	do conf attackAuto 2
+}
+
+automacro aurora_pm_reply {
+	PrivMsg /.+/
+	exclusive 0
+	timeout 10
+	call aurora_pm_reply_M
+}
+
+macro aurora_pm_reply_M {
+	log [pm] received from $.PrivMsgLastName: $.PrivMsgLastMsg
+	do pm $.PrivMsgLastName "ว่าไง มีไรปะ เดี๋ยวตอบแป๊บ กำลังเล่นอยู่"
+}
+
+automacro aurora_exit_new_1_3 {
+	InMap new_1-3
+	BaseLevel >= 15
+	disabled 1
+	ConfigKeyNot lockMap new_1-3
+	exclusive 1
+	priority 25
+	timeout 20
+	call aurora_exit_new_1_3_M
+}
+
+macro aurora_exit_new_1_3_M {
+	log [farm] leaving novice map new_1-3 via portal 96 174
+	do conf attackAuto_routeToLock 0
+	do conf attackAuto 0
+	do conf route_randomWalk 0
+	do move 96 174
+	pause 5
+	do talknpc 96 174 w1 c w1 r0
+	pause 5
+	do conf attackAuto 2
+}
+
+automacro aurora_exit_new_1_4 {
+	InMap new_1-4
+	ConfigKeyNot lockMap new_1-4
+	exclusive 1
+	priority 25
+	timeout 20
+	call aurora_exit_new_1_4_M
+}
+
+macro aurora_exit_new_1_4_M {
+	log [farm] leaving novice map new_1-4 via portal 100 29
+	do conf attackAuto_routeToLock 1
+	do move 100 29
+}
+
+automacro aurora_exit_moc_ruins {
+	InMap moc_ruins
+	ConfigKeyNot lockMap moc_ruins
+	exclusive 1
+	priority 25
+	timeout 20
+	call aurora_exit_moc_ruins_M
+}
+
+macro aurora_exit_moc_ruins_M {
+	log [farm] leaving moc_ruins via portal 159 37
+	do move 159 37
+}
+
+automacro aurora_exit_morocc {
+	InMap morocc
+	ConfigKeyNot lockMap morocc
+	exclusive 1
+	priority 25
+	timeout 20
+	call aurora_exit_morocc_M
+}
+
+macro aurora_exit_morocc_M {
+	log [farm] routing from morocc to izlude
+	do move izlude
+}
+
+automacro aurora_enable_farm_lock {
+	InMap prt_fild08
+	ConfigKeyNot lockMap prt_fild08
+	exclusive 0
+	priority 30
+	timeout 60
+	call aurora_enable_farm_lock_M
+}
+
+macro aurora_enable_farm_lock_M {
+	log [farm] reached prt_fild08; enabling lockMap farming route
+	do conf lockMap prt_fild08
+	do conf attackAuto_routeToLock 2
+	do conf route_randomWalk 1
+	do conf route_randomWalk_inLockOnly 1
+}
+
+#############################################################################
+# DISABLED — the job-change NPC on this server has NOT been located.
+#
+# first_job_thief walked to `izlu_in`, a map that does not exist on Eternal
+# Origin. The bot obeyed, went nowhere, and hung. first_job_swordman's prt_in
+# coords were never verified either. Both are kept here only as a record of the
+# talk sequence shape; do NOT re-enable them by guessing coordinates.
+#
+# To wire job change up properly: docs/job-change.md
+# (scan the candidate maps -> fill JOB_CHANGE in control-ui/lib/levelLadder.js
+#  -> node control-ui/scripts/generate-ladder-macros.js --write)
+#
+# automacro first_job_thief {
+# 	JobID 0
+# 	JobLevel >= 10
+# 	ConfigKey firstJob Thief
+# 	call first_job_thief_M
+# }
+# macro first_job_thief_M {
+# 	do move izlu_in 66 164          <-- แมพนี้ไม่มีอยู่จริง
+# 	do talknpc 66 164 c c r0 c n
+# 	do conf statsAddAuto_list agi 50, str 30, dex 30
+# 	do conf skillsAddAuto_list NV_BASIC 9, TF_DOUBLE 10, TF_MISS 10, TF_STEAL 10, TF_HIDING 5
+# }
+#
+# automacro first_job_swordman {
+# 	JobID 0
+# 	JobLevel >= 10
+# 	ConfigKey firstJob Swordman
+# 	call first_job_swordman_M
+# }
+# macro first_job_swordman_M {
+# 	do move prt_in 74 168           <-- พิกัดยังไม่ยืนยัน
+# 	do talknpc 74 168 c c r0 c n
+# 	do conf skillsAddAuto_list NV_BASIC 9, SM_BASH 10, SM_ENDURE 3, SM_PROVOKE 5, SM_SWORD 10, SM_MAGNUM 3
+# }
+#############################################################################
+
+# The three farm_* macros below are the OLD level-based map switcher. The
+# level-ladder block at the bottom of this file replaces them, so they must stay
+# out of the way whenever levelLadder is on — otherwise they fight over lockMap
+# and farm_done_50 turns the AI off at Base 50, half way up the ladder.
+automacro farm_map_20 {
+	ConfigKeyNot levelLadder 1
+	JobIDNot 0
+	BaseLevel >= 20
+	BaseLevel < 35
+	InMap prt_fild08
+	exclusive 0
+	timeout 600
+	call farm_map_20_M
+}
+
+macro farm_map_20_M {
+	log [farm] Base 20+ - lockMap prt_fild01
+	do conf lockMap prt_fild01
+}
+
+automacro farm_map_35 {
+	ConfigKeyNot levelLadder 1
+	JobIDNot 0
+	BaseLevel >= 35
+	BaseLevel < 50
+	InMap prt_fild01, prt_fild08
+	exclusive 0
+	timeout 600
+	call farm_map_35_M
+}
+
+macro farm_map_35_M {
+	log [farm] Base 35+ - lockMap gef_fild00
+	do conf lockMap gef_fild00
+}
+
+automacro farm_done_50 {
+	ConfigKeyNot levelLadder 1
+	BaseLevel >= 50
+	exclusive 1
+	priority 20
+	run-once 1
+	call farm_done_50_M
+}
+
+macro farm_done_50_M {
+	log [farm] Base 50 reached - stopping bot
+	do conf attackAuto 0
+	do conf route_randomWalk 0
+	do ai off
+}
+
+#############################################################################
+# >>> BEGIN explore-mode (generated by scripts/generate-explore-macros.js) <<<
+#
+# Toggle: exploreMode 1 in config.txt  (any "สำรวจ …" preset)
+# Preset sets lockMap + npcscan_map to the target town.
+#
+automacro explore_keep_peace {
+	ConfigKey exploreMode 1
+	exclusive 0
+	timeout 30
+	call explore_keep_peace_M
+}
+
+macro explore_keep_peace_M {
+	do conf attackAuto 0
+}
+
+automacro explore_go_map {
+	ConfigKey exploreMode 1
+	InLockMap 0
+	exclusive 1
+	priority 5
+	timeout 120
+	call explore_go_map_M
+}
+
+macro explore_go_map_M {
+	log [explore] Going to @config(lockMap) for NPC scan
+	do ai manual
+	do conf attackAuto 0
+	do conf route_randomWalk 0
+	do move @config(lockMap)
+	pause 4
+	do conf route_randomWalk 1
+	do conf route_randomWalk_inLockOnly 1
+	do conf route_randomWalk_inTown 1
+	do ai on
+}
+
+# >>> END explore-mode <<<
+
+# >>> BEGIN portal-scan (walk map to reveal real portal coords from game) <<<
+# เปิด: portalScan 1 + portalRecord 2 ใน config.txt
+# เกมจะ log "Portal Exists: map -> dest (x,y)" เมื่อเห็นพอร์ทัล
+# เดินผ่านพอร์ทัลแล้ว portalRecord บันทึกปลายทางลง portals.txt อัตโนมัติ
+automacro portal_scan_walk {
+	ConfigKey portalScan 1
+	ConfigKeyNot portalSurvey_running 1
+	exclusive 1
+	timeout 45
+	call portal_scan_walk_M
+}
+
+macro portal_scan_walk_M {
+	log [portalscan] random walk on current map to find portals
+	do conf attackAuto 0
+	do conf portalRecord 2
+	do conf route_randomWalk 1
+	do conf route_randomWalk_inLockOnly 0
+	do conf route_randomWalk_inTown 1
+	do ai on
+}
+# >>> END portal-scan <<<
+
+# >>> BEGIN portal-survey (generated by scripts/generate-portal-survey-macros.js) <<<
+#
+# สำรวจ 32 แมพ — เปิด portalSurvey 1 ใน config (preset "สำรวจทุกแมพ")
+# เกม log "Portal Exists" + portalRecord 2 บันทึกลง portals.txt ตอนเดินผ่าน
+#
+automacro portal_survey_start {
+	ConfigKey portalSurvey 1
+	ConfigKeyNot portalSurvey_running 1
+	exclusive 1
+	timeout 30
+	call portal_survey_start_M
+}
+
+macro portal_survey_start_M {
+	log [survey] Starting full map survey
+	do conf portalSurvey_running 1
+	do conf portalScan 1
+	do conf portalRecord 2
+	do conf attackAuto 0
+	do conf exploreMode 0
+	do conf levelLadder 0
+	do conf sitAuto_idle 0
+	do conf avoidObstacles_enable_avoid_portals 0
+	call portal_survey_all_M
+}
+
+macro portal_survey_all_M {
+	log [survey] 1/32 prontera
+	do conf lockMap prontera
+	do conf npcscan_map prontera
+	do conf npcscan 1
+	do conf route_randomWalk 1
+	do conf route_randomWalk_inLockOnly 1
+	do ai clear
+	do move prontera
+	pause 10
+	do ai on
+	pause 75
+	log [survey] 2/32 izlude
+	do conf lockMap izlude
+	do conf npcscan_map izlude
+	do conf npcscan 1
+	do conf route_randomWalk 1
+	do conf route_randomWalk_inLockOnly 1
+	do ai clear
+	do move izlude
+	pause 10
+	do ai on
+	pause 75
+	log [survey] 3/32 geffen
+	do conf lockMap geffen
+	do conf npcscan_map geffen
+	do conf npcscan 1
+	do conf route_randomWalk 1
+	do conf route_randomWalk_inLockOnly 1
+	do ai clear
+	do move geffen
+	pause 10
+	do ai on
+	pause 75
+	log [survey] 4/32 payon
+	do conf lockMap payon
+	do conf npcscan_map payon
+	do conf npcscan 1
+	do conf route_randomWalk 1
+	do conf route_randomWalk_inLockOnly 1
+	do ai clear
+	do move payon
+	pause 10
+	do ai on
+	pause 75
+	log [survey] 5/32 morocc
+	do conf lockMap morocc
+	do conf npcscan_map morocc
+	do conf npcscan 1
+	do conf route_randomWalk 1
+	do conf route_randomWalk_inLockOnly 1
+	do ai clear
+	do move morocc
+	pause 10
+	do ai on
+	pause 75
+	log [survey] 6/32 alberta
+	do conf lockMap alberta
+	do conf npcscan_map alberta
+	do conf npcscan 1
+	do conf route_randomWalk 1
+	do conf route_randomWalk_inLockOnly 1
+	do ai clear
+	do move alberta
+	pause 10
+	do ai on
+	pause 75
+	log [survey] 7/32 alberta_in
+	do conf lockMap alberta_in
+	do conf npcscan_map alberta_in
+	do conf npcscan 1
+	do conf route_randomWalk 1
+	do conf route_randomWalk_inLockOnly 1
+	do ai clear
+	do move alberta_in
+	pause 10
+	do ai on
+	pause 75
+	log [survey] 8/32 prt_church
+	do conf lockMap prt_church
+	do conf npcscan_map prt_church
+	do conf npcscan 1
+	do conf route_randomWalk 1
+	do conf route_randomWalk_inLockOnly 1
+	do ai clear
+	do move prt_church
+	pause 10
+	do ai on
+	pause 75
+	log [survey] 9/32 moc_prydb1
+	do conf lockMap moc_prydb1
+	do conf npcscan_map moc_prydb1
+	do conf npcscan 1
+	do conf route_randomWalk 1
+	do conf route_randomWalk_inLockOnly 1
+	do ai clear
+	do move moc_prydb1
+	pause 10
+	do ai on
+	pause 75
+	log [survey] 10/32 pay_arche
+	do conf lockMap pay_arche
+	do conf npcscan_map pay_arche
+	do conf npcscan 1
+	do conf route_randomWalk 1
+	do conf route_randomWalk_inLockOnly 1
+	do ai clear
+	do move pay_arche
+	pause 10
+	do ai on
+	pause 75
+	log [survey] 11/32 moc_ruins
+	do conf lockMap moc_ruins
+	do conf npcscan_map moc_ruins
+	do conf npcscan 1
+	do conf route_randomWalk 1
+	do conf route_randomWalk_inLockOnly 1
+	do ai clear
+	do move moc_ruins
+	pause 10
+	do ai on
+	pause 75
+	log [survey] 12/32 comodo
+	do conf lockMap comodo
+	do conf npcscan_map comodo
+	do conf npcscan 1
+	do conf route_randomWalk 1
+	do conf route_randomWalk_inLockOnly 1
+	do ai clear
+	do move comodo
+	pause 10
+	do ai on
+	pause 75
+	log [survey] 13/32 aldebaran
+	do conf lockMap aldebaran
+	do conf npcscan_map aldebaran
+	do conf npcscan 1
+	do conf route_randomWalk 1
+	do conf route_randomWalk_inLockOnly 1
+	do ai clear
+	do move aldebaran
+	pause 10
+	do ai on
+	pause 75
+	log [survey] 14/32 geffen_in
+	do conf lockMap geffen_in
+	do conf npcscan_map geffen_in
+	do conf npcscan 1
+	do conf route_randomWalk 1
+	do conf route_randomWalk_inLockOnly 1
+	do ai clear
+	do move geffen_in
+	pause 10
+	do ai on
+	pause 75
+	log [survey] 15/32 izlude_in
+	do conf lockMap izlude_in
+	do conf npcscan_map izlude_in
+	do conf npcscan 1
+	do conf route_randomWalk 1
+	do conf route_randomWalk_inLockOnly 1
+	do ai clear
+	do move izlude_in
+	pause 10
+	do ai on
+	pause 75
+	log [survey] 16/32 morocc_in
+	do conf lockMap morocc_in
+	do conf npcscan_map morocc_in
+	do conf npcscan 1
+	do conf route_randomWalk 1
+	do conf route_randomWalk_inLockOnly 1
+	do ai clear
+	do move morocc_in
+	pause 10
+	do ai on
+	pause 75
+	log [survey] 17/32 payon_in01
+	do conf lockMap payon_in01
+	do conf npcscan_map payon_in01
+	do conf npcscan 1
+	do conf route_randomWalk 1
+	do conf route_randomWalk_inLockOnly 1
+	do ai clear
+	do move payon_in01
+	pause 10
+	do ai on
+	pause 75
+	log [survey] 18/32 moc_castle
+	do conf lockMap moc_castle
+	do conf npcscan_map moc_castle
+	do conf npcscan 1
+	do conf route_randomWalk 1
+	do conf route_randomWalk_inLockOnly 1
+	do ai clear
+	do move moc_castle
+	pause 10
+	do ai on
+	pause 75
+	log [survey] 19/32 prt_fild08
+	do conf lockMap prt_fild08
+	do conf npcscan_map prt_fild08
+	do conf npcscan 1
+	do conf route_randomWalk 1
+	do conf route_randomWalk_inLockOnly 1
+	do ai clear
+	do move prt_fild08
+	pause 10
+	do ai on
+	pause 75
+	log [survey] 20/32 prt_fild01
+	do conf lockMap prt_fild01
+	do conf npcscan_map prt_fild01
+	do conf npcscan 1
+	do conf route_randomWalk 1
+	do conf route_randomWalk_inLockOnly 1
+	do ai clear
+	do move prt_fild01
+	pause 10
+	do ai on
+	pause 75
+	log [survey] 21/32 prt_fild09
+	do conf lockMap prt_fild09
+	do conf npcscan_map prt_fild09
+	do conf npcscan 1
+	do conf route_randomWalk 1
+	do conf route_randomWalk_inLockOnly 1
+	do ai clear
+	do move prt_fild09
+	pause 10
+	do ai on
+	pause 75
+	log [survey] 22/32 moc_fild01
+	do conf lockMap moc_fild01
+	do conf npcscan_map moc_fild01
+	do conf npcscan 1
+	do conf route_randomWalk 1
+	do conf route_randomWalk_inLockOnly 1
+	do ai clear
+	do move moc_fild01
+	pause 10
+	do ai on
+	pause 75
+	log [survey] 23/32 moc_fild04
+	do conf lockMap moc_fild04
+	do conf npcscan_map moc_fild04
+	do conf npcscan 1
+	do conf route_randomWalk 1
+	do conf route_randomWalk_inLockOnly 1
+	do ai clear
+	do move moc_fild04
+	pause 10
+	do ai on
+	pause 75
+	log [survey] 24/32 moc_fild07
+	do conf lockMap moc_fild07
+	do conf npcscan_map moc_fild07
+	do conf npcscan 1
+	do conf route_randomWalk 1
+	do conf route_randomWalk_inLockOnly 1
+	do ai clear
+	do move moc_fild07
+	pause 10
+	do ai on
+	pause 75
+	log [survey] 25/32 moc_fild20
+	do conf lockMap moc_fild20
+	do conf npcscan_map moc_fild20
+	do conf npcscan 1
+	do conf route_randomWalk 1
+	do conf route_randomWalk_inLockOnly 1
+	do ai clear
+	do move moc_fild20
+	pause 10
+	do ai on
+	pause 75
+	log [survey] 26/32 pay_fild01
+	do conf lockMap pay_fild01
+	do conf npcscan_map pay_fild01
+	do conf npcscan 1
+	do conf route_randomWalk 1
+	do conf route_randomWalk_inLockOnly 1
+	do ai clear
+	do move pay_fild01
+	pause 10
+	do ai on
+	pause 75
+	log [survey] 27/32 pay_fild02
+	do conf lockMap pay_fild02
+	do conf npcscan_map pay_fild02
+	do conf npcscan 1
+	do conf route_randomWalk 1
+	do conf route_randomWalk_inLockOnly 1
+	do ai clear
+	do move pay_fild02
+	pause 10
+	do ai on
+	pause 75
+	log [survey] 28/32 gef_fild00
+	do conf lockMap gef_fild00
+	do conf npcscan_map gef_fild00
+	do conf npcscan 1
+	do conf route_randomWalk 1
+	do conf route_randomWalk_inLockOnly 1
+	do ai clear
+	do move gef_fild00
+	pause 10
+	do ai on
+	pause 75
+	log [survey] 29/32 gef_fild01
+	do conf lockMap gef_fild01
+	do conf npcscan_map gef_fild01
+	do conf npcscan 1
+	do conf route_randomWalk 1
+	do conf route_randomWalk_inLockOnly 1
+	do ai clear
+	do move gef_fild01
+	pause 10
+	do ai on
+	pause 75
+	log [survey] 30/32 prt_maze01
+	do conf lockMap prt_maze01
+	do conf npcscan_map prt_maze01
+	do conf npcscan 1
+	do conf route_randomWalk 1
+	do conf route_randomWalk_inLockOnly 1
+	do ai clear
+	do move prt_maze01
+	pause 10
+	do ai on
+	pause 75
+	log [survey] 31/32 izlu2dun
+	do conf lockMap izlu2dun
+	do conf npcscan_map izlu2dun
+	do conf npcscan 1
+	do conf route_randomWalk 1
+	do conf route_randomWalk_inLockOnly 1
+	do ai clear
+	do move izlu2dun
+	pause 10
+	do ai on
+	pause 75
+	log [survey] 32/32 pay_dun00
+	do conf lockMap pay_dun00
+	do conf npcscan_map pay_dun00
+	do conf npcscan 1
+	do conf route_randomWalk 1
+	do conf route_randomWalk_inLockOnly 1
+	do ai clear
+	do move pay_dun00
+	pause 10
+	do ai on
+	pause 75
+	log [survey] DONE - run: node control-ui/scripts/extract-portals-from-log.js
+	do conf portalSurvey 0
+	do conf portalSurvey_running 0
+	do conf route_randomWalk 0
+}
+
+# >>> END portal-survey <<<
+
+
+# >>> BEGIN level-ladder (generated by scripts/generate-ladder-macros.js) <<<
+#
+# Toggle with: levelLadder 1 in config.txt  (preset "ไต่เลเวล 1-90")
+# Monster levels come from this server's own tables/monsters_table.txt.
+#
+
+automacro ladder_1_12 {
+	ConfigKey levelLadder 1
+	ConfigKey jobChangePhase 0
+	ConfigKeyNot exploreMode 1
+	ConfigKeyNot npcscan 1
+	BaseLevel >= 1
+	BaseLevel < 12
+	ConfigKeyNot lockMap prt_fild08
+	exclusive 1
+	priority 8
+	timeout 60
+	call ladder_1_12_M
+}
+
+macro ladder_1_12_M {
+	log [ladder] Base 1-12 -> farming prt_fild08 mobs=Poring, Drops, Lunatic, Fabre
+	do conf lockMap prt_fild08
+	do conf attackAuto 2
+	do conf route_randomWalk 1
+	do conf route_randomWalk_inLockOnly 1
+	do move prt_fild08
+}
+
+automacro ladder_12_20 {
+	ConfigKey levelLadder 1
+	ConfigKey jobChangePhase 0
+	ConfigKeyNot exploreMode 1
+	ConfigKeyNot npcscan 1
+	JobIDNot 0
+	BaseLevel >= 12
+	BaseLevel < 20
+	ConfigKeyNot lockMap prt_fild06
+	exclusive 1
+	priority 8
+	timeout 60
+	call ladder_12_20_M
+}
+
+macro ladder_12_20_M {
+	log [ladder] Base 12-20 -> farming prt_fild06 mobs=Hornet, Rocker, Creamy, Fabre, Lunatic
+	do conf lockMap prt_fild06
+	do conf attackAuto 2
+	do conf route_randomWalk 1
+	do conf route_randomWalk_inLockOnly 1
+	do move prt_fild06
+}
+
+automacro ladder_20_30 {
+	ConfigKey levelLadder 1
+	ConfigKey jobChangePhase 0
+	ConfigKeyNot exploreMode 1
+	ConfigKeyNot npcscan 1
+	JobIDNot 0
+	BaseLevel >= 20
+	BaseLevel < 30
+	ConfigKeyNot lockMap pay_fild02
+	exclusive 1
+	priority 8
+	timeout 60
+	call ladder_20_30_M
+}
+
+macro ladder_20_30_M {
+	log [ladder] Base 20-30 -> farming pay_fild02 mobs=Spore, Wormtail, Willow, Fabre
+	do conf lockMap pay_fild02
+	do conf attackAuto 2
+	do conf route_randomWalk 1
+	do conf route_randomWalk_inLockOnly 1
+	do move pay_fild02
+}
+
+automacro ladder_30_40 {
+	ConfigKey levelLadder 1
+	ConfigKey jobChangePhase 0
+	ConfigKeyNot exploreMode 1
+	ConfigKeyNot npcscan 1
+	JobIDNot 0
+	BaseLevel >= 30
+	BaseLevel < 40
+	ConfigKeyNot lockMap prt_fild10
+	exclusive 1
+	priority 8
+	timeout 60
+	call ladder_30_40_M
+}
+
+macro ladder_30_40_M {
+	log [ladder] Base 30-40 -> farming prt_fild10 mobs=Poporing, Elder Willow, Drops, Lunatic
+	do conf lockMap prt_fild10
+	do conf attackAuto 2
+	do conf route_randomWalk 1
+	do conf route_randomWalk_inLockOnly 1
+	do move prt_fild10
+}
+
+automacro ladder_40_50 {
+	ConfigKey levelLadder 1
+	ConfigKey jobChangePhase 0
+	ConfigKeyNot exploreMode 1
+	ConfigKeyNot npcscan 1
+	JobIDNot 0
+	BaseLevel >= 40
+	BaseLevel < 50
+	ConfigKeyNot lockMap prt_fild11
+	exclusive 1
+	priority 8
+	timeout 60
+	call ladder_40_50_M
+}
+
+macro ladder_40_50_M {
+	log [ladder] Base 40-50 -> farming prt_fild11 mobs=Coco, Elder Willow, Poporing
+	do conf lockMap prt_fild11
+	do conf attackAuto 2
+	do conf route_randomWalk 1
+	do conf route_randomWalk_inLockOnly 1
+	do move prt_fild11
+}
+
+automacro ladder_50_60 {
+	ConfigKey levelLadder 1
+	ConfigKey jobChangePhase 0
+	ConfigKeyNot exploreMode 1
+	ConfigKeyNot npcscan 1
+	JobIDNot 0
+	BaseLevel >= 50
+	BaseLevel < 60
+	ConfigKeyNot lockMap moc_fild02
+	exclusive 1
+	priority 8
+	timeout 60
+	call ladder_50_60_M
+}
+
+macro ladder_50_60_M {
+	log [ladder] Base 50-60 -> farming moc_fild02 mobs=Peco Peco, Muka, Condor, Picky
+	do conf lockMap moc_fild02
+	do conf attackAuto 2
+	do conf route_randomWalk 1
+	do conf route_randomWalk_inLockOnly 1
+	do move moc_fild02
+}
+
+automacro ladder_60_70 {
+	ConfigKey levelLadder 1
+	ConfigKey jobChangePhase 0
+	ConfigKeyNot exploreMode 1
+	ConfigKeyNot npcscan 1
+	JobIDNot 0
+	BaseLevel >= 60
+	BaseLevel < 70
+	ConfigKeyNot lockMap pay_dun00
+	exclusive 1
+	priority 8
+	timeout 60
+	call ladder_60_70_M
+}
+
+macro ladder_60_70_M {
+	log [ladder] Base 60-70 -> farming pay_dun00 mobs=Zombie, Skeleton, Familiar
+	do conf lockMap pay_dun00
+	do conf attackAuto 2
+	do conf route_randomWalk 1
+	do conf route_randomWalk_inLockOnly 1
+	do move pay_dun00
+}
+
+automacro ladder_70_80 {
+	ConfigKey levelLadder 1
+	ConfigKey jobChangePhase 0
+	ConfigKeyNot exploreMode 1
+	ConfigKeyNot npcscan 1
+	JobIDNot 0
+	BaseLevel >= 70
+	BaseLevel < 80
+	ConfigKeyNot lockMap moc_pryd02
+	exclusive 1
+	priority 8
+	timeout 60
+	call ladder_70_80_M
+}
+
+macro ladder_70_80_M {
+	log [ladder] Base 70-80 -> farming moc_pryd02 mobs=Familiar, Zombie, Skeleton, Archer Skeleton
+	do conf lockMap moc_pryd02
+	do conf attackAuto 2
+	do conf route_randomWalk 1
+	do conf route_randomWalk_inLockOnly 1
+	do move moc_pryd02
+}
+
+automacro ladder_80_90 {
+	ConfigKey levelLadder 1
+	ConfigKey jobChangePhase 0
+	ConfigKeyNot exploreMode 1
+	ConfigKeyNot npcscan 1
+	JobIDNot 0
+	BaseLevel >= 80
+	ConfigKeyNot lockMap in_sphinx2
+	exclusive 1
+	priority 8
+	timeout 60
+	call ladder_80_90_M
+}
+
+macro ladder_80_90_M {
+	log [ladder] Base 80-90 -> farming in_sphinx2 mobs=Zerom, Marduk, Matyr
+	do conf lockMap in_sphinx2
+	do conf attackAuto 2
+	do conf route_randomWalk 1
+	do conf route_randomWalk_inLockOnly 1
+	do move in_sphinx2
+}
+
+# Job change is NOT wired up yet: the job-changer NPC for this server has
+# not been located. Run the "สำรวจ" preset on the candidate maps, read the
+# names out of logs/npc_scan/<map>.txt, then fill JOB_CHANGE in
+# lib/levelLadder.js, set verified:true, and re-run this script.
+
+# >>> END level-ladder <<<
