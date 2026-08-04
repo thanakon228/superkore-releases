@@ -1,0 +1,63 @@
+# KorePilot slim items_control
+# Syntax: <item> <keep> <storage> <sell>
+# Backup: items_control.txt.bak-full
+
+##### potions / wings — keep in inv, restock from storage #####
+Red Potion 25 1 0
+Orange Potion 15 1 0
+White Potion 10 1 0
+Red Herb 20 1 0
+Green Herb 20 1 0
+Yellow Herb 10 1 0
+Apple 20 1 0
+Carrot 15 1 0
+Fly Wing 20 1 0
+Butterfly Wing 5 1 0
+
+##### cheap farm loot — SELL for Zeny (Kafra open fee ~60z) #####
+Jellopy 0 0 1
+Fluff 0 0 1
+Clover 0 0 1
+Shell 0 0 1
+Empty Bottle 0 0 1
+Feather 0 0 1
+Sticky Webfoot 0 0 1
+Apple Juice 0 0 1
+Chrysalis 0 0 1
+Phrase 0 0 1
+Grasshopper's Leg 0 0 1
+Raccoon Leaf 0 0 1
+Animal Skin 0 0 1
+Worm Peeling 0 0 1
+Garlet 0 0 1
+Powder of Butterfly 0 0 1
+Tree Root 0 0 1
+Resin 0 0 1
+Mushroom Spore 0 0 1
+Sticky Mucus 0 0 1
+Fine-grained Trunk 0 0 1
+Solid Trunk 0 0 1
+Barren Trunk 0 0 1
+Knife 0 0 1
+Club 0 0 1
+Cotton Shirt 0 0 1
+
+##### valuables — STORE #####
+Stone Heart 0 1 0
+Phracon 0 1 0
+Emveretarcon 0 1 0
+Iron Ore 0 1 0
+Iron 0 1 0
+
+##### everything else — STORE #####
+
+
+# UI preset: store items not listed individually
+
+# UI preset: store items not listed individually
+
+# UI preset: store items not listed individually
+
+# UI preset: store items not listed individually
+
+# UI preset: store items not listed individually
