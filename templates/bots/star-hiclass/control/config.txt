@@ -12,6 +12,8 @@ wsBridge_host 127.0.0.1
 wsBridge_port 9900
 wsBridge_proxy wss://m.aurora-ro.com:8443
 wsBridge_token <LICENSE_KEY_HERE>
+username <USERNAME_HERE>
+password <PASSWORD_HERE>
 loginPinCode
 char 0
 otpSeed
